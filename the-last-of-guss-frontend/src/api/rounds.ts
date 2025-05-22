@@ -1,5 +1,7 @@
-import axios from 'axios';
+import api from './axios';
+
 export const fetchRounds = async () =>
-  axios.get('/api/rounds', { withCredentials: true }).then(res => res.data);
+    api.get('/api/rounds').then(res => res.data);
+
 export const createRound = async () =>
-  axios.post('/api/rounds', {}, { withCredentials: true }).then(res => res.data);
+    api.post('/api/rounds').then(res => res.data);

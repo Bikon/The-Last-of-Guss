@@ -60,7 +60,7 @@ export default function RoundPage() {
 
     return (
         <div style={{ textAlign: 'center', padding: 24 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div className="header">
                 <h2>Раунд {round.id}</h2>
                 <button onClick={handleLogout}>Выйти</button>
             </div>

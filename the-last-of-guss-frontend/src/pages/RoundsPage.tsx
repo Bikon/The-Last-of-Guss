@@ -45,7 +45,7 @@ export default function RoundsPage() {
 
     return (
         <div style={{ padding: 24 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="header">
                 <h2>Список раундов — {username}</h2>
                 <button onClick={handleLogout}>Выйти</button>
             </div>
