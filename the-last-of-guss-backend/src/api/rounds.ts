@@ -60,6 +60,60 @@ const roundsRoutes: FastifyPluginAsync = async (fastify) => {
             status: 'cooldown',
         };
     });
+
+    // Получение информации о конкретном раунде
+    fastify.get('/api/rounds/:id', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+        const user = request.user;
+        const { id } = request.params as { id: string };
+
+        const round = await prisma.round.findUnique({
+            where: { id },
+            include: {
+                scores: {
+                    include: {
+                        user: true,
+                    },
+                },
+            },
+        });
+
+        if (!round) {
+            return reply.code(404).send({ error: 'Раунд не найден' });
+        }
+
+        const now = new Date();
+        let status: 'cooldown' | 'active' | 'ended' = 'cooldown';
+
+        if (now >= round.startAt && now < round.endAt) status = 'active';
+        else if (now >= round.endAt) status = 'ended';
+
+        const userScore = round.scores.find((s) => s.userId === user.userId);
+
+        // Победитель только если ended
+        const winner =
+            status === 'ended'
+                ? round.scores.reduce(
+                    (acc, s) => (s.score > acc.score ? s : acc),
+                    { user: { username: '' }, score: 0 }
+                )
+                : null;
+
+        return {
+            id: round.id,
+            startAt: round.startAt,
+            endAt: round.endAt,
+            cooldownStart: round.cooldownStart,
+            status,
+            totalScore: round.totalScore,
+            myScore: user.role === 'nikita' ? 0 : userScore?.score ?? 0,
+            winner: winner
+                ? {
+                    username: winner.user.username,
+                    score: winner.score,
+                }
+                : null,
+        };
+    });
 };
 
 export default roundsRoutes;
