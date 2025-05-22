@@ -47,7 +47,16 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
             })
             .send({ success: true });
     });
-};
 
+    fastify.get('/api/me', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+        const user = request.user as { userId: string; role: string; username: string };
+
+        return {
+            id: user.userId,
+            username: user.username,
+            role: user.role,
+        };
+    })
+};
 
 export default authRoutes;
