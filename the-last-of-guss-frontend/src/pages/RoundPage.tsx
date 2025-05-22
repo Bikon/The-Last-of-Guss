@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { fetchRoundDetails, tapGuss } from '../api/roundDetails';
+import { logout as apiLogout } from '../api/auth';
+import { useUserStore } from '../store/useUserStore';
 
 interface RoundInfo {
     id: string;
@@ -15,9 +17,10 @@ interface RoundInfo {
 
 export default function RoundPage() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [round, setRound] = useState<RoundInfo | null>(null);
     const [timeLeft, setTimeLeft] = useState<string>('');
-    const [intervalId, setIntervalId] = useState<number | null>(null);
+    const { logout } = useUserStore();
 
     const updateTimer = (round: RoundInfo) => {
         const now = new Date();
@@ -25,56 +28,65 @@ export default function RoundPage() {
         const end = new Date(round.endAt);
         const time = round.status === 'cooldown' ? start : end;
         const diff = Math.max(0, time.getTime() - now.getTime());
-
         const seconds = Math.floor((diff / 1000) % 60);
         const minutes = Math.floor((diff / 1000 / 60) % 60);
-
         setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
     };
 
     const load = async () => {
-        const data = await fetchRoundDetails(id!);
+        const data = await fetchRoundDetails(id!) as RoundInfo;
         setRound(data);
         updateTimer(data);
     };
 
     const handleTap = async () => {
-        const res = await tapGuss(id!);
+        const res = await tapGuss(id!) as { score: number };
         if (round) setRound({ ...round, myScore: res.score });
+    };
+
+    const handleLogout = async () => {
+        await apiLogout();
+        logout();
+        navigate('/login');
     };
 
     useEffect(() => {
         load();
-
-        const idInt = window.setInterval(() => {
-            load();
-        }, 1000);
-
-        setIntervalId(idInt);
-
-        return () => clearInterval(idInt);
+        const timer = setInterval(load, 1000);
+        return () => clearInterval(timer);
     }, []);
 
     if (!round) return <div>Загрузка...</div>;
 
-    const isActive = round.status === 'active';
-    const isCooldown = round.status === 'cooldown';
-    const isEnded = round.status === 'ended';
-
     return (
         <div style={{ textAlign: 'center', padding: 24 }}>
-            <h2>Раунд {round.id}</h2>
-            {isCooldown && <h3>⏳ Cooldown<br />до начала: {timeLeft}</h3>}
-            {isActive && <h3>🔥 Раунд активен!<br />до конца: {timeLeft}</h3>}
-            {isEnded && <h3>✅ Раунд завершён</h3>}
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <h2>Раунд {round.id}</h2>
+                <button onClick={handleLogout}>Выйти</button>
+            </div>
 
-            <div style={{ fontSize: 100, margin: 32, cursor: isActive ? 'pointer' : 'default' }} onClick={isActive ? handleTap : undefined}>
+            <h3>
+                {round.status === 'cooldown'
+                    ? `⏳ Cooldown — до начала: ${timeLeft}`
+                    : round.status === 'active'
+                        ? `🔥 Активен — до конца: ${timeLeft}`
+                        : '✅ Раунд завершён'}
+            </h3>
+
+            <div
+                style={{
+                    fontSize: 100,
+                    margin: 32,
+                    cursor: round.status === 'active' ? 'pointer' : 'default'
+                }}
+                onClick={round.status === 'active' ? handleTap : undefined}
+            >
                 🦆
             </div>
 
             <div style={{ fontSize: 20, marginBottom: 12 }}>Мои очки: {round.myScore}</div>
 
-            {isEnded && (
+            {round.status === 'ended' && (
                 <div style={{ marginTop: 24 }}>
                     <hr />
                     <div><strong>Победитель:</strong> {round.winner?.username || '—'}</div>

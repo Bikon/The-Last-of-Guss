@@ -52,6 +52,10 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
         const { userId, username, role } = request.user;
         return { id: userId, username, role };
     });
+
+    fastify.post('/api/logout', async (request, reply) => {
+        reply.clearCookie('token', { path: '/' }).send({ success: true });
+    });
 };
 
 export default authRoutes;
