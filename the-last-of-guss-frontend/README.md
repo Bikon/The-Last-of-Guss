@@ -1,54 +1,96 @@
-# React + TypeScript + Vite
+# 🦆 The Last of Guss — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Браузерная игра, где выжившие соревнуются в скорости тапов по мутировавшему гусю G-42. Это клиентская часть на React.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Быстрый старт
 
-## Expanding the ESLint configuration
+### 1. Установка зависимостей
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Запуск dev-сервера
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+npm run dev
 ```
+
+Открой [http://localhost:5173](http://localhost:5173) в браузере.
+
+---
+
+## ⚙️ Конфигурация
+
+Фронтенд ожидает, что backend работает по адресу:
+
+```
+http://localhost:3000
+```
+
+Настраивается через `vite.config.ts`:
+
+```ts
+server: {
+  proxy: {
+    '/api': 'http://localhost:3000'
+  }
+}
+```
+
+---
+
+## 🧱 Стек технологий
+
+- ✅ React 18 + TypeScript
+- ✅ Vite
+- ✅ Zustand — глобальное хранилище состояния
+- ✅ Axios — API-клиент
+- ✅ React Router v6 — маршрутизация
+
+---
+
+## 📁 Основные файлы
+
+| Файл                       | Назначение                         |
+|---------------------------|------------------------------------|
+| `src/pages/LoginPage.tsx` | Страница входа                     |
+| `src/pages/RoundsPage.tsx`| Список раундов                     |
+| `src/pages/RoundPage.tsx` | Страница раунда и тапов            |
+| `src/store/useUserStore.ts` | Хранилище пользователя             |
+| `src/api/*.ts`            | Функции для общения с backend'ом   |
+
+---
+
+## 📸 Интерфейсы
+
+- `/login` — вход по имени и паролю (авторизация через куки)
+- `/rounds` — список активных и запланированных раундов
+- `/round/:id` — игра (тапы, счёт, статус)
+
+---
+
+## 📦 Сборка
+
+```bash
+npm run build
+```
+
+Итоговая сборка будет в папке `dist/`.
+
+---
+
+## 🛠 Зависимости
+
+```bash
+npm install react react-dom react-router-dom axios zustand
+npm install -D typescript vite @vitejs/plugin-react @types/react @types/react-dom
+```
+
+---
+
+## 🧪 Поддержка
+
+Если тебе нужно собрать backend, см. [the-last-of-guss-backend](../the-last-of-guss-backend/README.md)
