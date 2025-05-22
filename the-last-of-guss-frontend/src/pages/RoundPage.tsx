@@ -33,12 +33,6 @@ export default function RoundPage() {
         setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
     };
 
-    const load = async () => {
-        const data = await fetchRoundDetails(id!) as RoundInfo;
-        setRound(data);
-        updateTimer(data);
-    };
-
     const handleTap = async () => {
         const res = await tapGuss(id!) as { score: number };
         if (round) setRound({ ...round, myScore: res.score });
@@ -51,10 +45,20 @@ export default function RoundPage() {
     };
 
     useEffect(() => {
-        load();
-        const timer = setInterval(load, 1000);
-        return () => clearInterval(timer);
-    }, []);
+        let timer: NodeJS.Timeout;
+
+        (async function loadAndMaybePoll() {
+            const data = await fetchRoundDetails(id!) as RoundInfo;
+            setRound(data);
+            updateTimer(data);
+
+            if (data.status !== 'ended') {
+                timer = setTimeout(() => loadAndMaybePoll(), 1000);
+            }
+        })();
+
+        return () => clearTimeout(timer);
+    }, [id]);
 
     if (!round) return <div>Загрузка...</div>;
 
