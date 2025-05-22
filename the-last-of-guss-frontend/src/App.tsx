@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
+import RoundsPage from './pages/RoundsPage';
 
 export default function App() {
     return (
@@ -7,7 +8,8 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<Navigate to="/login" />} />
                 <Route path="/login" element={<LoginPage />} />
-                {/* /rounds и /round/:id */}
+                <Route path="/rounds" element={<RoundsPage />} />
+                {/* /round/:id */}
             </Routes>
         </BrowserRouter>
     );
